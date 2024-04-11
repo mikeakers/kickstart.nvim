@@ -84,11 +84,23 @@ I hope you enjoy your Neovim journey,
 P.S. You can delete this when you're done too. It's your config now! :)
 --]]
 
+vim.cmd [[
+au VimEnter,VimResume * set guicursor=n-v-c:block,i-ci-ve:ver25,r-cr:hor20,o:hor50
+  \,a:blinkwait700-blinkoff400-blinkon250-Cursor/lCursor
+  \,sm:block-blinkwait175-blinkoff150-blinkon175
+au VimLeave,VimSuspend * set guicursor=a:underscore-blinkon0
+]]
+
+vim.cmd 'set exrc'
+
 -- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
+
+-- Enable nice icons and stuff
+vim.g.have_nerd_font = true
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -99,7 +111,7 @@ vim.g.maplocalleader = ' '
 vim.opt.number = true
 -- You can also add relative line numbers, for help with jumping.
 --  Experiment for yourself to see if you like it!
--- vim.opt.relativenumber = true
+vim.opt.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
@@ -124,6 +136,9 @@ vim.opt.smartcase = true
 
 -- Keep signcolumn on by default
 vim.opt.signcolumn = 'yes'
+
+-- add a guide at column 100
+vim.api.nvim_set_option_value('colorcolumn', '100', {})
 
 -- Decrease update time
 vim.opt.updatetime = 250
@@ -222,6 +237,8 @@ require('lazy').setup {
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
 
+  'github/copilot.vim',
+
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
   -- keys can be used to configure plugin behavior/loading/etc.
@@ -315,7 +332,7 @@ require('lazy').setup {
       -- Useful for getting pretty icons, but requires special font.
       --  If you already have a Nerd Font, or terminal set up with fallback fonts
       --  you can enable this
-      -- { 'nvim-tree/nvim-web-devicons' }
+      { 'nvim-tree/nvim-web-devicons' },
     },
     config = function()
       -- Telescope is a fuzzy finder that comes with a lot of different things that
@@ -521,6 +538,21 @@ require('lazy').setup {
       local capabilities = vim.lsp.protocol.make_client_capabilities()
       capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
 
+      require('lspconfig').sourcekit.setup {
+        capabilities = capabilities,
+        --on_attach = on_attach,
+        cmd = {
+          '/Applications/Xcode-15.2.0.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/sourcekit-lsp',
+        },
+        root_dir = function(filename, _)
+          local util = require 'lspconfig.util'
+          return util.root_pattern 'buildServer.json'(filename)
+            or util.root_pattern('*.xcodeproj', '*.xcworkspace')(filename)
+            or util.find_git_ancestor(filename)
+            or util.root_pattern 'Package.swift'(filename)
+        end,
+      }
+
       -- Enable the following language servers
       --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
       --
@@ -531,10 +563,10 @@ require('lazy').setup {
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
-        -- clangd = {},
+        clangd = {},
         -- gopls = {},
         -- pyright = {},
-        -- rust_analyzer = {},
+        rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
         -- Some languages (like typescript) have entire language plugins that can be useful:
@@ -543,7 +575,6 @@ require('lazy').setup {
         -- But for many setups, the LSP (`tsserver`) will work just fine
         -- tsserver = {},
         --
-
         lua_ls = {
           -- cmd = {...},
           -- filetypes { ...},
@@ -795,6 +826,31 @@ require('lazy').setup {
       --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
       --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
     end,
+  },
+
+  {
+    'johmsalas/text-case.nvim',
+    dependencies = { 'nvim-telescope/telescope.nvim' },
+    config = function()
+      require('textcase').setup {}
+      require('telescope').load_extension 'textcase'
+    end,
+    keys = {
+      'ga', -- Default invocation prefix
+      { 'ga.', '<cmd>TextCaseOpenTelescope<CR>', mode = { 'n', 'x' }, desc = 'Telescope' },
+    },
+    cmd = {
+      -- NOTE: The Subs command name can be customized via the option "substitude_command_name"
+      'Subs',
+      'TextCaseOpenTelescope',
+      'TextCaseOpenTelescopeQuickChange',
+      'TextCaseOpenTelescopeLSPChange',
+      'TextCaseStartReplacingCommand',
+    },
+    -- If you want to use the interactive feature of the `Subs` command right away, text-case.nvim
+    -- has to be loaded on startup. Otherwise, the interactive feature of the `Subs` will only be
+    -- available after the first executing of it or after a keymap of text-case.nvim has been used.
+    lazy = false,
   },
 
   -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
