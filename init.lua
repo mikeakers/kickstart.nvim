@@ -544,18 +544,18 @@ require('lazy').setup({
           --    See `:help CursorHold` for information about when this is executed
           --
           -- When you move your cursor, the highlights will be cleared (the second autocommand).
-          local client = vim.lsp.get_client_by_id(event.data.client_id)
-          if client and client.server_capabilities.documentHighlightProvider then
-            vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
-              buffer = event.buf,
-              callback = vim.lsp.buf.document_highlight,
-            })
-
-            vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI' }, {
-              buffer = event.buf,
-              callback = vim.lsp.buf.clear_references,
-            })
-          end
+          --          local client = vim.lsp.get_client_by_id(event.data.client_id)
+          --          if client and client.server_capabilities.documentHighlightProvider then
+          --            vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
+          --              buffer = event.buf,
+          --              callback = vim.lsp.buf.document_highlight,
+          --            })
+          --
+          --            vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI' }, {
+          --              buffer = event.buf,
+          --              callback = vim.lsp.buf.clear_references,
+          --            })
+          --          end
         end,
       })
 
@@ -570,7 +570,7 @@ require('lazy').setup({
         capabilities = capabilities,
         --on_attach = on_attach,
         cmd = {
-          '/Applications/Xcode-15.2.0.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/sourcekit-lsp',
+          '/Applications/Xcode-15.4.0.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/sourcekit-lsp',
         },
         root_dir = function(filename, _)
           local util = require 'lspconfig.util'
@@ -803,7 +803,7 @@ require('lazy').setup({
       -- Load the colorscheme here.
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
+      vim.cmd.colorscheme 'tokyonight-day'
 
       -- You can configure highlights by doing something like:
       vim.cmd.hi 'Comment gui=none'
@@ -971,9 +971,9 @@ end)
 vim.keymap.set('n', '<C-i>', function()
   harpoon:list():select(3)
 end)
-vim.keymap.set('n', '<C-o>', function()
-  harpoon:list():select(4)
-end)
+-- vim.keymap.set('n', '<C-o>', function()
+--   harpoon:list():select(4)
+-- end)
 
 -- Toggle previous & next buffers stored within Harpoon list
 vim.keymap.set('n', '<C-S-P>', function()
